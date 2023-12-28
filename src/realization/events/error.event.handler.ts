@@ -5,7 +5,7 @@ import { AppQueueService } from '../queues/app.queue.service';
 //TODO что то сделать с payload
 @Injectable()
 export class ErrorEventHandler {
-  constructor(private appQueue: AppQueueService) {}
+  constructor(private readonly appQueue: AppQueueService) {}
   @OnEvent('error.registered')
   handleErrorRegistrationEvent(payload: {
     status: number;

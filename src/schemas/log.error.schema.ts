@@ -22,6 +22,9 @@ export class LogError {
 
   @Prop()
   stack: string;
+
+  @Prop()
+  ip: string;
 }
 
 export const LogErrorSchema = SchemaFactory.createForClass(LogError);

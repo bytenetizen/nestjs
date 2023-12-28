@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
 import { AppService } from '../../app.service';
+import { FastifyReply } from 'fastify';
 
 @Catch(HttpException)
 export class CustomExceptionFilter implements ExceptionFilter {
@@ -14,7 +15,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
-    const request = ctx.getRequest<Request>();
+    const request = ctx.getRequest(); //<Request>
     const status = exception.getStatus();
 
     const exceptionResponse = exception.getResponse();
@@ -40,6 +41,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
       created_at: timestamp,
       front: JSON.stringify(front),
       stack: exception.stack,
+      ip: this.getClientIp(request),
     });
 
     response.status(status).send(front);
@@ -79,5 +81,15 @@ export class CustomExceptionFilter implements ExceptionFilter {
       default:
         return 'Unprocessable Entity';
     }
+  }
+
+  private getClientIp(req): string | null {
+    return (
+      req.headers['x-forwarded-for'] ||
+      req.connection?.remoteAddress ||
+      req.socket?.remoteAddress ||
+      req.connection?.socket?.remoteAddress ||
+      null
+    );
   }
 }

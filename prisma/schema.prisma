@@ -14,12 +14,13 @@ datasource db {
 
 model User {
   id         String   @id @default(uuid()) @db.Uuid
-  name       String
-  lastname   String
+  name       String   @db.VarChar(255)
+  lastname   String   @db.VarChar(255)
   birthday   String
   gender     String
-  status     String   @default("ready")
-  email      String   @unique
+  status     Int      @default(1)
+  email      String?   @unique @db.VarChar(255)
+  phone      String?   @unique @db.VarChar(255)
   password   String   @map("password")
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -34,4 +35,26 @@ model Post {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   @@map(name: "posts")
+}
+
+model AccessToken {
+  id         String    @id @default(uuid())
+  user_id    String    @db.VarChar(255) //index
+  token      String    @unique
+  name       String?   @db.VarChar(255)
+  scopes     String[]
+  revoked    Boolean   @default(true)
+  created_at DateTime  @default(now())
+  expires_at DateTime  @default(now())
+  @@index([user_id])
+  @@map(name: "access_token")
+}
+
+model RefreshToken {
+  id               String   @id
+  access_token_id  String   @unique @db.VarChar(255)
+  revoked          Boolean  @default(true)
+  created_at       DateTime @default(now())
+  expires_at       DateTime @default(now())
+  @@map(name: "refresh_token")
 }

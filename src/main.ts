@@ -8,12 +8,15 @@ import { AppService } from './app.service';
 import { UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
 import { useContainer } from 'class-validator';
 import { CustomExceptionFilter } from './common/exceptions/custom.exception.filter';
+import helmet from '@fastify/helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ logger: true }),
   );
+  await app.register(helmet);
+
   app.setGlobalPrefix('api');
 
   app.useGlobalPipes(
@@ -30,7 +33,6 @@ async function bootstrap() {
   });
   const appService = app.get(AppService);
   app.useGlobalFilters(new CustomExceptionFilter(appService));
-
   const port = appService.getServerPort();
   await app.listen(port);
 }
