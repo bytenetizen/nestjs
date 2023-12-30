@@ -9,6 +9,7 @@ import { UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
 import { useContainer } from 'class-validator';
 import { CustomExceptionFilter } from './common/exceptions/custom.exception.filter';
 import helmet from '@fastify/helmet';
+import fastifySecureSession from '@fastify/secure-session';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -18,7 +19,6 @@ async function bootstrap() {
   await app.register(helmet);
 
   app.setGlobalPrefix('api');
-
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -33,6 +33,9 @@ async function bootstrap() {
   });
   const appService = app.get(AppService);
   app.useGlobalFilters(new CustomExceptionFilter(appService));
+
+  await app.register(fastifySecureSession, appService.getCookieSettings());
+
   const port = appService.getServerPort();
   await app.listen(port);
 }

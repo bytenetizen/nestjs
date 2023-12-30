@@ -29,7 +29,11 @@
 ## Installation
 
 ```bash
-$ npm install
+$ npm install 
+
+$ prisma generate 
+
+$ prisma migrate dev
 ```
 
 ## Running the app

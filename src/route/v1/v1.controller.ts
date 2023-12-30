@@ -6,10 +6,17 @@ import { UserService } from '../../realization/user.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from '../../realization/auth/auth.service';
 import { TokenService } from '../../realization/auth/token.service';
+import { FrontService } from '../../realization/user/front.service';
 
 @Module({
   controllers: [EntryController, BaseController, AuthController],
-  providers: [UsersModule, UserService, AuthService, TokenService],
+  providers: [
+    UsersModule,
+    UserService,
+    AuthService,
+    TokenService,
+    FrontService,
+  ],
   imports: [],
 })
 export class V1Module {}

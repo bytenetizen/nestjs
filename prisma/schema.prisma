@@ -14,17 +14,19 @@ datasource db {
 
 model User {
   id         String   @id @default(uuid()) @db.Uuid
+  email      String?   @unique @db.VarChar(255)
+  phone      String?   @unique @db.VarChar(255)
   name       String   @db.VarChar(255)
   lastname   String   @db.VarChar(255)
   birthday   String
   gender     String
   status     Int      @default(1)
-  email      String?   @unique @db.VarChar(255)
-  phone      String?   @unique @db.VarChar(255)
   password   String   @map("password")
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-
+  userRoles      UserRole[]
+  userPermissions UserPermission[]
+  userStatus         Status      @relation(fields: [status], references: [id])
   @@map("users")
 }
 
@@ -37,10 +39,19 @@ model Post {
   @@map(name: "posts")
 }
 
+model BlocklistIp {
+  id       Int      @id @default(autoincrement())
+  start_ip   String  @unique @db.Inet
+  end_ip     String  @unique @db.Inet
+  revoked    Boolean   @default(true)
+  created_at DateTime @default(now())
+  @@map(name: "blocklist-ip")
+}
+
 model AccessToken {
   id         String    @id @default(uuid())
-  user_id    String    @db.VarChar(255) //index
   token      String    @unique
+  user_id    String    @db.VarChar(255) //index
   name       String?   @db.VarChar(255)
   scopes     String[]
   revoked    Boolean   @default(true)
@@ -57,4 +68,65 @@ model RefreshToken {
   created_at       DateTime @default(now())
   expires_at       DateTime @default(now())
   @@map(name: "refresh_token")
+}
+
+model Role {
+  id       Int      @id @default(autoincrement())
+  slug     String   @unique
+  name     String
+  created_at DateTime @default(now())
+  userRoles      UserRole[]
+  rolePermissions RolePermission[]
+  @@map(name: "roles")
+}
+
+model Permission {
+  id       Int      @id @default(autoincrement())
+  slug     String   @unique
+  name     String
+  created_at DateTime @default(now())
+  userPermissions UserPermission[]
+  rolePermissions RolePermission[]
+  @@map(name: "permissions")
+}
+
+model UserRole {
+  user_id String @default(uuid()) @db.Uuid
+  role_id Int
+  user   User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  @@id([user_id, role_id])
+  @@index([user_id], name: "userRoleId")
+  @@index([role_id], name: "roleRoleId")
+  @@map(name: "users_roles")
+}
+
+model RolePermission {
+  role_id       Int
+  permission_id Int
+  role         Role      @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  permission   Permission    @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+  @@id([role_id, permission_id])
+  @@index([role_id], name: "roleRolePermissionId")
+  @@index([permission_id], name: "permissionRoleId")
+  @@map(name: "roles_permissions")
+}
+
+model UserPermission {
+  user_id       String @default(uuid()) @db.Uuid
+  permission_id Int
+  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+  @@id([user_id, permission_id])
+  @@index([user_id], name: "userPermissionId")
+  @@index([permission_id], name: "permissionUserId")
+  @@map(name: "users_permissions")
+}
+
+model Status {
+  id       Int      @id @default(autoincrement())
+  name     String   @db.VarChar(25)
+  description     String    @db.VarChar(255)
+  users       User[]
+  @@map(name: "status")
 }

@@ -13,6 +13,10 @@ import { RouterModule } from '@nestjs/core';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { MongooseModule } from '@nestjs/mongoose';
 import { IpRange, IpRangeSchema } from './schemas/ip.range.schema';
+import { AuthGuard } from './ guard/auth.guard';
+import { TokenService } from './realization/auth/token.service';
+import { AuthService } from './realization/auth/auth.service';
+import { FrontService } from './realization/user/front.service';
 
 @Module({
   imports: [
@@ -33,7 +37,14 @@ import { IpRange, IpRangeSchema } from './schemas/ip.range.schema';
     ]),
   ],
   controllers: [AppController],
-  providers: [AppService, AppThrottlerModule],
+  providers: [
+    AppService,
+    AppThrottlerModule,
+    AuthGuard,
+    TokenService,
+    AuthService,
+    FrontService,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
