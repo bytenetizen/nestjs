@@ -27,6 +27,26 @@ export class AppService {
     return this.configService.get<number>('serverPort', 3000);
   }
 
+  getCookiesKey(key: string): Buffer[] {
+    const keyString: string = this.configService.get<string>(key, '18*yaCo');
+
+    const keyBuffer = Buffer.alloc(32);
+    keyBuffer.write(keyString);
+
+    return [keyBuffer];
+  }
+
+  getCookiesSecret(): string {
+    return this.configService.get<string>(
+      'cookiesSecret',
+      'averylogphrasebiggerthanthirtytwochars',
+    );
+  }
+  getCookiesSalt(): string {
+    return this.configService.get<string>('cookiesSalt', 'mq9hDxBVDbspDR6n');
+  }
+
+  //TODO переделать на посгрес
   async isUseService(ips: string | string[]): Promise<boolean> {
     const isUseBlacklist: boolean = this.configService.get<boolean>(
       'isUseBlacklist',
@@ -66,9 +86,46 @@ export class AppService {
       }
     } catch (error) {
       throw new BadRequestException(error);
-      return false;
     }
 
     return false;
+  }
+
+  getCookieSettings() {
+    const maxAgeInMillis: number = this.configService.get<number>(
+      'maxAgeInMillisCookie',
+      30240 * 60 * 1000,
+    );
+
+    return [
+      {
+        sessionName: 'session',
+        cookieName: 'session',
+        key: this.getCookiesKey('keySession'),
+        secret: this.getCookiesSecret(),
+        salt: this.getCookiesSalt(),
+        cookie: {
+          // signed:true,
+          path: '/',
+          httpOnly: true,
+          secure: true,
+          maxAge: maxAgeInMillis,
+        },
+      },
+      {
+        sessionName: 'myOtherSession',
+        cookieName: 'appSession',
+        key: this.getCookiesKey('keyAppSession'),
+        secret: this.getCookiesSecret(),
+        salt: this.getCookiesSalt(),
+        cookie: {
+          path: '/',
+          // signed:true,
+          httpOnly: true,
+          secure: true,
+          maxAge: maxAgeInMillis,
+        },
+      },
+    ];
   }
 }

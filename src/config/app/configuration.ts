@@ -16,13 +16,20 @@ export default () => ({
     process.env.APP_ACCESS_TOKEN_PRIVATE_KEY || 'bu!a2L&IND6kTs',
   refreshTokenSecret:
     process.env.APP_REFRESH_TOKEN_PRIVATE_KEY || 'NWM<0B1-cVIm',
-  accessTokenTime: process.env.APP_ACCESS_TOKEN_TIME || 16,
-  refreshTokenTime: process.env.APP_REFRESH_TOKEN_TIME || 30240,
+  keySession: process.env.KEY_SESSION || '18*yaCo',
+  keyAppSession: process.env.KEY_APP_SESSION || '18*yaCo',
+  cookiesSecret:
+    process.env.COOKIES_SECRET || 'averylogphrasebiggerthanthirtytwochars',
+  cookiesSalt: process.env.COOKIES_SALT || 'mq9hDxBVDbspDR6n',
+  accessTokenTime: parseInt(process.env.APP_ACCESS_TOKEN_TIME) || 16,
+  refreshTokenTime: parseInt(process.env.APP_REFRESH_TOKEN_TIME) || 30240,
   isUseBlacklist: validateBoolean(process.env.IS_USE_BLACKLIST || false),
   isUseBlacklistBd: validateBoolean(process.env.IS_USE_BLACKLIST_BD || false),
   isUseBlacklistFile: validateBoolean(
     process.env.IS_USE_BLACKLIST_FILE || false,
   ),
+  maxAgeInMillisCookie:
+    (parseInt(process.env.APP_REFRESH_TOKEN_TIME) || 30240) * 60 * 1000,
   db: {
     postgres: {
       host: process.env.DB_HOST || '127.0.0.1',

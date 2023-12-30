@@ -8,6 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 
+//TODO @IsUnique
 export class CreateUserDto {
   @IsString({ message: 'validation.string' })
   @IsNotEmpty({ message: 'validation.required' })
