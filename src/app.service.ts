@@ -16,7 +16,7 @@ export class AppService {
     private readonly eventEmitter: EventEmitter2, // @InjectModel(IpRange.name) private IpRangeModel: Model<IpRange>,
   ) {}
   getHello(): string {
-    return 'Hello World!!!';
+    return 'Hello World!';
   }
 
   setLogError(data: object): boolean {

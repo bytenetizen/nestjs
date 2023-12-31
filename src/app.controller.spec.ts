@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('AppController', () => {
   let app: TestingModule;
@@ -8,7 +10,17 @@ describe('AppController', () => {
   beforeAll(async () => {
     app = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService],
+      providers: [
+        AppService,
+        {
+          provide: ConfigService,
+          useValue: {}, // You may want to provide a mock or a real instance
+        },
+        {
+          provide: EventEmitter2,
+          useValue: new EventEmitter2(), // You can create a new instance here
+        },
+      ],
     }).compile();
   });
 
