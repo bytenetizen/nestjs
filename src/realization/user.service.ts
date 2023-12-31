@@ -4,17 +4,6 @@ import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-//TODO 'active','assay','frozen','deleted'
-// Pending: Пользователь только что зарегистрировался и еще не прошел проверку.
-// Banned: Пользователь был заблокирован за нарушение правил системы.
-// Suspended: Пользователь был временно приостановлен за нарушение правил системы.
-// Unconfirmed: Пользователь не подтвердил свою учетную запись.
-// New: Пользователь только что зарегистрировался.
-// Pro: Пользователь имеет платную подписку.
-// VIP: Пользователь имеет особый статус или привилегии.
-// Admin: Пользователь является администратором системы.
-// Guest: Пользователь не имеет учетной записи, но может просматривать и взаимодействовать с некоторыми функциями системы.
-
 const prisma = new PrismaClient();
 @Injectable()
 export class UserService {
@@ -38,5 +27,18 @@ export class UserService {
     });
     this.eventEmitter.emit('user.registered', user);
     return user;
+  }
+
+  async getUser(userId: string): Promise<any> {
+    return prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        userRoles: {
+          include: {
+            role: true,
+          },
+        },
+      },
+    });
   }
 }

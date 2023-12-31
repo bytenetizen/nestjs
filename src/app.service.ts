@@ -3,16 +3,17 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as fs from 'fs';
-import { InjectModel } from '@nestjs/mongoose';
-import { IpRange } from './schemas/ip.range.schema';
-import { Model } from 'mongoose';
+// import { InjectModel } from '@nestjs/mongoose';
+// import { IpRange } from './schemas/ip.range.schema';
+// import { Model } from 'mongoose';
+import { PrismaClient } from '@prisma/client';
 
+const prisma = new PrismaClient();
 @Injectable()
 export class AppService {
   constructor(
     private readonly configService: ConfigService,
-    private readonly eventEmitter: EventEmitter2,
-    @InjectModel(IpRange.name) private IpRangeModel: Model<IpRange>,
+    private readonly eventEmitter: EventEmitter2, // @InjectModel(IpRange.name) private IpRangeModel: Model<IpRange>,
   ) {}
   getHello(): string {
     return 'Hello World!!!';
@@ -46,7 +47,6 @@ export class AppService {
     return this.configService.get<string>('cookiesSalt', 'mq9hDxBVDbspDR6n');
   }
 
-  //TODO переделать на посгрес
   async isUseService(ips: string | string[]): Promise<boolean> {
     const isUseBlacklist: boolean = this.configService.get<boolean>(
       'isUseBlacklist',
@@ -64,14 +64,26 @@ export class AppService {
     const ipToCheck = Array.isArray(ips) ? ips[0] : ips;
     try {
       if (isUseBlacklistBd) {
-        const ranges = await this.IpRangeModel.find({
-          start_ip: { $lte: ipToCheck },
-          end_ip: { $gte: ipToCheck },
+        const range = await prisma.blocklistIp.findFirst({
+          where: {
+            start_ip: { lte: ipToCheck },
+            end_ip: { gte: ipToCheck },
+          },
         });
 
-        if (ranges.length > 0) {
+        if (range) {
           return true;
         }
+        //TODO может стоит сделать переключение
+
+        // const ranges = await this.IpRangeModel.find({
+        //   start_ip: { $lte: ipToCheck },
+        //   end_ip: { $gte: ipToCheck },
+        // });
+
+        // if (ranges.length > 0) {
+        //   return true;
+        // }
       }
 
       const isUseBlacklistFile = this.configService.get<boolean>(
