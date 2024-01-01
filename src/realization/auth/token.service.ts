@@ -11,10 +11,10 @@ const prisma = new PrismaClient();
 export class TokenService {
   constructor(private readonly configService: ConfigService) {}
   async generateTokens(
-    userId: string,
+    user: any,
   ): Promise<{ refreshToken: string; accessToken: string }> {
     try {
-      const payload = { id: userId };
+      const payload = user;
 
       const accessTokenSecret = this.configService.get<string>(
         'accessTokenSecret',
@@ -41,11 +41,12 @@ export class TokenService {
         accessTokenSecret,
       );
       const refreshToken = this.getToken(
-        payload,
+        { id: payload.id },
         refreshTokenTime + 'm',
         refreshTokenSecret,
       );
-
+      // const accessToken = this.getTokenRS(payload, accessTokenTime + 'm');
+      // const refreshToken = this.getTokenRS(payload, refreshTokenTime + 'm');
       const now = new Date();
 
       const accessExpiresAt = new Date(
@@ -57,7 +58,7 @@ export class TokenService {
       );
       const saveToken = await prisma.accessToken.create({
         data: {
-          user_id: userId,
+          user_id: user.id,
           token: accessToken,
           expires_at: accessExpiresAt,
         },

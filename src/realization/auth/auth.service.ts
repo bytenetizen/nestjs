@@ -40,11 +40,13 @@ export class AuthService {
     }
 
     this.eventEmitter.emit('user.login', user);
-    const { accessToken, refreshToken } =
-      await this.tokenService.generateTokens(user.id);
 
+    const { accessToken, refreshToken } =
+      await this.tokenService.generateTokens(
+        this.frontService.extractUserTokenFields(user),
+      );
     return {
-      user: this.frontService.extractUserFields(user),
+      user: this.frontService.extractUserTokenFields(user),
       accessToken,
       refreshToken,
     };
