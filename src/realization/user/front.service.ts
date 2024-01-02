@@ -18,13 +18,9 @@ export class FrontService {
 
   extractUserTokenFields(user: any): {
     id: string;
-    name: string;
-    gender: number;
   } {
     return {
       id: user.id,
-      name: user.name,
-      gender: user.gender,
     };
   }
 }

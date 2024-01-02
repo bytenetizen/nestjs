@@ -3,6 +3,8 @@ import * as jwt from 'jsonwebtoken';
 import * as fs from 'fs';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
+import { createCipheriv, randomBytes, scrypt, createDecipheriv } from 'crypto';
+import { promisify } from 'util';
 
 const privateKey = fs.readFileSync('private.pem', 'utf8');
 const publicKey = fs.readFileSync('public.pem', 'utf8');
@@ -12,10 +14,9 @@ export class TokenService {
   constructor(private readonly configService: ConfigService) {}
   async generateTokens(
     user: any,
+    payload: any,
   ): Promise<{ refreshToken: string; accessToken: string }> {
     try {
-      const payload = user;
-
       const accessTokenSecret = this.configService.get<string>(
         'accessTokenSecret',
         'wtf',
@@ -41,7 +42,7 @@ export class TokenService {
         accessTokenSecret,
       );
       const refreshToken = this.getToken(
-        { id: payload.id },
+        payload,
         refreshTokenTime + 'm',
         refreshTokenSecret,
       );
@@ -68,12 +69,14 @@ export class TokenService {
         data: {
           access_token_id: saveToken.id,
           id: refreshToken,
+          fp_id: 1,
           expires_at: refreshExpiresAt,
         },
       });
 
       return { refreshToken, accessToken };
     } catch (err) {
+      console.log(err);
       throw new HttpException(err, HttpStatus.UNAUTHORIZED);
     }
   }

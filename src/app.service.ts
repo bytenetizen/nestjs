@@ -1,5 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
+import { DateTime } from 'luxon';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as fs from 'fs';
@@ -139,5 +144,59 @@ export class AppService {
         },
       },
     ];
+  }
+
+  async checkUni({
+    targetName,
+    property,
+    value,
+  }: {
+    targetName: string;
+    property: string;
+    value: any;
+  }): Promise<any> {
+    if (!targetName || !property || value === undefined) {
+      throw new Error(
+        'Missing required parameters: targetName, property, value',
+      );
+    }
+    try {
+      return await prisma[targetName].findUnique({
+        select: {
+          [property]: true,
+        },
+        where: {
+          [property]: value,
+        },
+      });
+    } catch (error) {
+      // Обработка ошибок или проброс исключения
+      throw error;
+    }
+  }
+
+  async isCheckDateBirth(value: string): Promise<boolean | string> {
+    const date = DateTime.fromISO(value);
+
+    if (value !== date.toISODate()) {
+      return false;
+    }
+    const { minYears, maxYears } = this.getYears();
+
+    const currentDate = DateTime.now();
+    const minDate = currentDate.minus({ years: maxYears });
+    const maxDate = currentDate.minus({ years: minYears });
+
+    if (date < minDate || date > maxDate) {
+      return false;
+    }
+
+    return true;
+  }
+
+  getYears(): { minYears: number; maxYears: number } {
+    const minYears: number = this.configService.get<number>('minYears', 13);
+    const maxYears: number = this.configService.get<number>('maxYears', 100);
+    return { minYears, maxYears };
   }
 }

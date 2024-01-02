@@ -7,6 +7,9 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { IsUnique } from '../../rule/validation/is.unique';
+import { CheckDateBirth } from '../../rule/validation/check.date.birth';
+import { CheckPassword } from '../../rule/validation/check.password';
 
 //TODO @IsUnique
 export class CreateUserDto {
@@ -15,7 +18,7 @@ export class CreateUserDto {
   @IsEmail({}, { message: 'validation.emailFormat' })
   @MinLength(5, { message: 'validation.badMinLength' })
   @MaxLength(100, { message: 'validation.badMaxLength' })
-  // @IsUnique({ always: true, context:[User,1]})
+  @IsUnique({ context: ['user', 1] })
   email: string;
 
   @IsOptional()
@@ -38,7 +41,7 @@ export class CreateUserDto {
 
   @IsString({ message: 'validation.string' })
   @IsNotEmpty({ message: 'validation.required' })
-  // @CheckDateOfBirth()
+  @CheckDateBirth()
   birthday: Date;
 
   @IsNotEmpty({ message: 'validation.required' })
@@ -50,6 +53,12 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'validation.required' })
   @MinLength(5, { message: 'validation.badMinLength' })
   @MaxLength(50, { message: 'validation.badMaxLength' })
-  // @CheckPassword()
+  @CheckPassword()
   password: string;
+
+  @IsOptional()
+  @IsString({ message: 'validation.string' })
+  @MinLength(2, { message: 'validation.badMinLength' })
+  @MaxLength(100, { message: 'validation.badMaxLength' })
+  fingerprint: string;
 }

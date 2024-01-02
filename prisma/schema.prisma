@@ -25,6 +25,7 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   userRoles      UserRole[]
+  userFingerprint      Fingerprint[]
   userPermissions UserPermission[]
   userStatus         Status      @relation(fields: [status], references: [id])
   @@map("users")
@@ -64,9 +65,11 @@ model AccessToken {
 model RefreshToken {
   id               String   @id
   access_token_id  String   @unique @db.VarChar(255)
+  fp_id            Int      @default(1)
   revoked          Boolean  @default(true)
   created_at       DateTime @default(now())
   expires_at       DateTime @default(now())
+  userfp         Fingerprint      @relation(fields: [fp_id], references: [id])
   @@map(name: "refresh_token")
 }
 
@@ -129,4 +132,17 @@ model Status {
   description     String    @db.VarChar(255)
   users       User[]
   @@map(name: "status")
+}
+
+
+model Fingerprint {
+  id       Int      @id @default(autoincrement())
+  user_id       String @default(uuid()) @db.Uuid
+  fingerprint     String    @db.VarChar(130)
+  type_fp     Int  @default(1)
+  created_at       DateTime @default(now())
+  user   User @relation(fields: [user_id], references: [id])
+  refreshToken       RefreshToken[]
+  @@index([user_id,fingerprint, type_fp], name: "userfingerprintTypeFp")
+  @@map(name: "fingerprints")
 }

@@ -50,12 +50,12 @@ export class AuthController {
   ): Promise<any> {
     try {
       const { accessToken, refreshToken } =
-        await this.authService.getRefreshToken(user?.id, refreshTokenOld);
-      request.session.set('token', {
-        accessToken,
-        refreshToken,
-      });
-      return { result: 'done' };
+        await this.authService.getRefreshToken(user, refreshTokenOld);
+      // request.session.set('token', {
+      //   accessToken,
+      //   refreshToken,
+      // });
+      return { result: 'success', accessToken, refreshToken };
     } catch (err) {
       throw new HttpException(err, HttpStatus.UNAUTHORIZED);
     }

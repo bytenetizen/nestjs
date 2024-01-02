@@ -17,6 +17,9 @@ import { AuthGuard } from './ guard/auth.guard';
 import { TokenService } from './realization/auth/token.service';
 import { AuthService } from './realization/auth/auth.service';
 import { FrontService } from './realization/user/front.service';
+import { AppCryptoService } from './realization/app/app.crypto.service';
+import { IsUniqueConstraint } from './rule/validation/is.unique';
+import { CheckDateBirthConstraint } from './rule/validation/check.date.birth';
 
 @Module({
   imports: [
@@ -41,9 +44,12 @@ import { FrontService } from './realization/user/front.service';
     AppService,
     AppThrottlerModule,
     AuthGuard,
+    AppCryptoService,
     TokenService,
     AuthService,
     FrontService,
+    IsUniqueConstraint,
+    CheckDateBirthConstraint,
   ],
 })
 export class AppModule implements NestModule {

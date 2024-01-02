@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+
 function validateBoolean(input: boolean | string): boolean {
   if (typeof input === 'string') {
     const lowercaseInput = input.toLowerCase();
@@ -12,6 +14,11 @@ function validateBoolean(input: boolean | string): boolean {
 export default () => ({
   serverPort: parseInt(process.env.SERVER_PORT, 10) || 3000,
   saltRounds: parseInt(process.env.SALT_ROUNDS, 13) || 13,
+  minYears: parseInt(process.env.MIN_YEARS, 13) || 13,
+  maxYears: parseInt(process.env.MAX_YEARS, 100) || 100,
+  privateKey: fs.readFileSync('private.pem', 'utf8'),
+  privateCryptoKey: process.env.PRIVATE_CRYPTO_KEY || 'IND6kTs',
+  privateCryptoSalt: process.env.PRIVATE_CRYPTO_SALT || 'cVImD6kTs',
   accessTokenSecret:
     process.env.APP_ACCESS_TOKEN_PRIVATE_KEY || 'bu!a2L&IND6kTs',
   refreshTokenSecret:

@@ -4,6 +4,7 @@ import * as bcrypt from 'bcryptjs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TokenService } from './token.service';
 import { FrontService } from '../user/front.service';
+import { AppCryptoService } from '../app/app.crypto.service';
 
 const prisma = new PrismaClient();
 @Injectable()
@@ -12,6 +13,7 @@ export class AuthService {
     private readonly eventEmitter: EventEmitter2,
     private readonly tokenService: TokenService,
     private readonly frontService: FrontService,
+    private readonly appCryptoService: AppCryptoService,
   ) {}
   async login(data: { contact: string; password: string }) {
     const user = await prisma.user.findFirst({
@@ -30,6 +32,7 @@ export class AuthService {
       );
     }
 
+    console.log(user);
     const isMatch = await bcrypt.compare(data.password, user.password);
 
     if (!isMatch) {
@@ -41,12 +44,15 @@ export class AuthService {
 
     this.eventEmitter.emit('user.login', user);
 
+    const frontUser: { id: string } =
+      this.frontService.extractUserTokenFields(user);
+    const payload: { id: any } = {
+      id: await this.appCryptoService.createAppCipher(frontUser),
+    };
     const { accessToken, refreshToken } =
-      await this.tokenService.generateTokens(
-        this.frontService.extractUserTokenFields(user),
-      );
+      await this.tokenService.generateTokens(frontUser, payload);
     return {
-      user: this.frontService.extractUserTokenFields(user),
+      user: frontUser,
       accessToken,
       refreshToken,
     };
@@ -86,10 +92,17 @@ export class AuthService {
     return !!tokenObj;
   }
 
-  async getRefreshToken(userId: string, refreshTokenOld: string) {
-    await this.tokenService.deletedTokens(userId, refreshTokenOld);
+  async getRefreshToken(user: string, refreshTokenOld: string) {
+    console.log(user);
+    const userDecode = await this.appCryptoService.decryptAppCipher(user);
+
+    await this.tokenService.deletedTokens(userDecode.id, refreshTokenOld);
+    const payload: { id: any } = {
+      id: await this.appCryptoService.createAppCipher(userDecode),
+    };
     const { accessToken, refreshToken } =
-      await this.tokenService.generateTokens(userId);
+      await this.tokenService.generateTokens(userDecode, payload);
+
     return {
       accessToken,
       refreshToken,

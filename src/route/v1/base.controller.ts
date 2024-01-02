@@ -24,9 +24,13 @@ export class BaseController {
     private readonly authService: AuthService,
   ) {}
   @Post('register')
-  register(@Body() createUserDto: CreateUserDto): any {
-    throw new BadRequestException('Validation failed');
-    return this.userService.createUser(createUserDto);
+  register(
+    @Body() createUserDto: CreateUserDto,
+    @Res({ passthrough: true }) response: FastifyReply,
+  ): any {
+    // throw new BadRequestException('Validation failed');
+    console.log(response);
+    return this.userService.createUser(createUserDto, response);
   }
 
   @Post('login')
@@ -40,12 +44,12 @@ export class BaseController {
         loginUserDto,
       );
 
-      request.session.set('token', {
-        accessToken,
-        refreshToken,
-      });
+      // request.session.set('token', {
+      //   accessToken,
+      //   refreshToken,
+      // });
 
-      return user;
+      return { result: 'success', accessToken, refreshToken };
     } catch (err) {
       throw new HttpException(err, HttpStatus.UNAUTHORIZED);
     }
@@ -87,6 +91,8 @@ export class BaseController {
     try {
       return { result: 'example' };
     } catch (err) {
+      // throw new HttpException('ssss', HttpStatus.UNPROCESSABLE_ENTITY);
+      // throw new Error(`validation.between_${minYears}_${maxYears}`);
       throw new HttpException(err, HttpStatus.UNAUTHORIZED);
     }
   }
